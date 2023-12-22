@@ -1,4 +1,4 @@
-        !COMPILER-GENERATED INTERFACE MODULE: Mon Nov 27 13:58:00 2023
+        !COMPILER-GENERATED INTERFACE MODULE: Sun Dec 17 12:24:29 2023
         ! This source file is for reference only and may not completely
         ! represent the generated interface used by the compiler.
         MODULE CDINN5__genmod

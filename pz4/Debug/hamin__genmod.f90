@@ -1,4 +1,4 @@
-        !COMPILER-GENERATED INTERFACE MODULE: Wed Nov 15 17:34:57 2023
+        !COMPILER-GENERATED INTERFACE MODULE: Sun Dec 17 12:24:29 2023
         ! This source file is for reference only and may not completely
         ! represent the generated interface used by the compiler.
         MODULE HAMIN__genmod

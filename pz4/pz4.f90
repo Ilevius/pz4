@@ -1,31 +1,24 @@
 program pz4
+use Nedospasov_deltas
 implicit none
 
 complex*16 ci
-real*8 h, d, rho, eps0, eps22, eps11, e24, e15, c44, c55
-real*8 w, f, pi
+real*8 h, d, rho, eps0, eps22, eps11, e24, e15, c44, c55, w, pi
 parameter (pi=3.141592653589793d0)
 parameter (ci = (0d0,1d0))
 real*8 fmin, fmax, fstep, dzetaMin, dzetaMax, haminStep, haminEps
-real*8 x(200), z(200)
-complex*16 u(200)
-integer i
-
-
-
-
- !                       из письма, F/m
+real*8, allocatable :: x(:), z(:), f(:)
+complex*16, allocatable ::  u(:), uRes(:)
+integer i, pointsNum, freqNum
+ !                       из письма, F/m Y cut
     c44 = 0.743d2
-    c55 = 0.25d2
-    
+    c55 = 0.25d2   
     e15 = 5.16d0
-    e24 = 11.7d0
-    
+    e24 = 11.7d0    
     eps11 = 3.27d-1
     eps22 = 6.903d0
 
-  
- !!                       из письма, F/m с перестановкой 
+ !!                       из письма, F/m с перестановкой X cut
  !   c44 = 0.25d2
  !   c55 = 0.743d2
  !   
@@ -34,136 +27,77 @@ integer i
  !   
  !   eps11 = 6.903d0
  !   eps22 = 3.27d-1
- 
-    
-
-    
+   
     eps0 = 8.85d-3
-    h = 5d0
-    d = h/2
+    h = 5d0; d = h/2;
     rho = 4.630d0
             
-    fmin = 1d-3
-    fmax = 5.2d0
-    fstep = 1d-2
+    fmin = 0d0; fmax = 3.5d0; fstep = 1d-4; ! disp curves settings                               A L L    P O I N T S
     
-    dzetaMin = 1d-4
-    dzetaMax = 10d0
-    haminStep = 1d-3
-    haminEps = 1d-7
+    !fmin = 2.9d0; fmax = fmin + 0.2d0; fstep = 1d-4; ! disp curves settings                               D E T A I L S     P O I N T S
     
-    x = [(-5d0+5d-2*i, i = 1, 200)]
-    z = 0d0
-    
+     
+    dzetaMin = 0d0; dzetaMax = 6d0; haminStep = 1d-3; haminEps = 1d-7 ! Hamin settings
 
-    !call plotDcurves(fmin, fmax, fstep, dzetaMin, dzetaMax, haminStep, haminEps)
+    pointsNum = 1; freqNum = 300;
+    allocate(x(pointsNum), z(pointsNum), u(pointsNum), uRes(pointsNum), f(freqNum))
+    x = [(-5.05d0+5d-2*i, i = 1, pointsNum)]; z = -h;
+    f = [(0d0+2d-2*i, i = 1, freqNum)]
+
+    call plotDcurves(fmin, fmax, fstep, dzetaMin, dzetaMax, haminStep, haminEps)
     !call testBoundary(-5d0, 5d0, 0.5d-1)
-    call plotU
+    !call plotU
     !call testEq
-    call plotUres  
     !call plotSigma(rho, eps22, eps11, e24, e15, c44, c55, 6d0*pi)
-    
     !call testBound
-    
-    
-
-    
-    
     !call plotTestField
-    !call plotTestRes
+    !call plotTestRes   
     
-    
-contains
-    
+contains   
     real*8 function haminDelta(alfa)
     implicit none
     real*8 alfa
-    complex*16 a(4), sigma(2), p(2), B(4,4), t(4,1)
-    complex*16 alfa_c, C(4,4), R(4,4)
+    complex*16 alfa_c, C(4,4), R(4,4),  a(4), sigma(2), p(2), B(4,4), t(4,1)
         alfa_c = alfa*(1d0,0d0)
-        t(1,1) = 1d0
-        t(2,1) = 0d0
-        t(3,1) = 0d0
-        t(4,1) = 0d0
-
+        t(1,1) = 1d0; t(2,1) = 0d0; t(3,1) = 0d0; t(4,1) = 0d0
         call makeA(rho, eps22, eps11, e24, e15, c44, c55, w, alfa_c, a)
         call makeSigma(a, sigma)
         call makeP(sigma, a, p)
         call makeB(h, eps0, eps22, e24, c44, alfa_c, p, sigma, B)
         call STAR5(B,t,C,R,4,4,1,3) 
-        haminDelta = abs( 1d0/( ( abs(t(1,1)) + abs(t(2,1)) + abs(t(3,1)) + abs(t(4,1)) ) ) )
+        haminDelta = 1d0/(  abs(t(1,1)) + abs(t(2,1)) + abs(t(3,1)) + abs(t(4,1))  ) 
     end
-    
-    FUNCTION th(x)
-    implicit none
-    complex*16 th, x
-        th = (1-exp(-2d0*x))/(1+exp(-2d0*x))
-    END FUNCTION th
-    
-    function deltaA(k)
-    implicit none 
-    real*8 k, deltaA
-    complex*16 G(4), ksi(4), num, den, deltaA_c
-        call makeKsi(c44, c55, e15, e24, eps11, eps22, rho, w, k, ksi)
-        call makeG(eps11, eps22, e15, e24, k, ksi, G)
-        num = (c44 + e24*G(1))*ksi(1)*( (e24 - eps22*G(3))*ksi(3) - eps0*k*G(3)*th(ksi(3)*d) )
-        den = (c44 + e24*G(3))*ksi(3)*( (e24 - eps22*G(1))*ksi(1) - eps0*k*G(1)*th(ksi(1)*d) )
-        deltaA_c = num/den -1d0
-        deltaA = abs( deltaA_c )
-    end
-    
-    
-    real*8 function deltaS(k)
-    implicit none 
-    real*8 k
-    complex*16 G(4), ksi(4), num, den, deltaS_c
-        call makeKsi(c44, c55, e15, e24, eps11, eps22, rho, w, k, ksi)
-        call makeG(eps11, eps22, e15, e24, k, ksi, G)
-        num = (c44 + e24*G(1))*ksi(1)*( (e24 - eps22*G(3))*ksi(3) - eps0*k*G(3)*(th(ksi(3)*d))**(-1) )
-        den = (c44 + e24*G(3))*ksi(3)*( (e24 - eps22*G(1))*ksi(1) - eps0*k*G(1)*(th(ksi(1)*d))**(-1) )
-        deltaS_c = num/den - 1d0
-        deltaS = abs(deltaS_c)
-    end
-    
-    
+     
     subroutine plotDcurves(fmin, fmax, fstep, smin,smax,hs,eps)
     implicit none
-    real*8 fmin, fmax, fstep, smin,smax,hs,eps, dz(10), z(1)
+    real*8 fmin, fmax, fstep, smin,smax,hs,eps, dz(10), z(1), f
     complex*16 res(1) 
     integer Ndz, i
-        open(1, file='dCurves.txt', FORM='FORMATTED')
+        call outPoints(c44, e24, eps22, rho, h, 4)
+        open(1, file='dCurves.txt', FORM='FORMATTED'); write(1, '(A)') "% f, dz, f/dz, dz/f, residue";
         do f = fmin, fmax, fstep
-            w = 2d0*pi*f
+            w = 2d0*pi*f; z = -d*1d-3;
             call Hamin(haminDelta,smin,smax,hs,eps,10,dz,Ndz)
-            z = 0d0
             do i = 1, Ndz
-                            !           *           *       *   проверка полюсов вычетом
-                call resK(h, eps0, eps11, eps22, e15, e24, c44, c55, rho, w, dz(i), 1d-7, res, z, 1)
-                if ( abs(res(1)) > 1d-7 ) write(1, '(5E15.6E3)') f, dz(i), f/dz(i),  dz(i)/f, abs(res(1))
-                !write(1, '(5E15.6E3)') f, dz(i), f/dz(i),  dz(i)/f, abs(res(1))
+                call resK(h, eps0, eps11, eps22, e15, e24, c44, c55, rho, w, dz(i), 1d-4, res, z, 1) !  *   *  *   проверка полюсов вычетом
+                !if ( abs(res(1)) > 1d-4 ) 
+                write(1, '(7E15.6E3)') f, dz(i), f/dz(i),  dz(i)/f, abs(res(1)), Ndz*1d0 
             enddo
         enddo 
         close(1)
-    end subroutine plotDcurves
-    
-    
-    
+    end subroutine plotDcurves       
     
     SUBROUTINE u_integrand(alfa, s, n)
         implicit none;
         integer n, i
         complex*16 alfa, s(n), sigma(2), Q, t(4,1), a(4), p(2), B(4,4), C(4,4), R(4,4), U 
-
             Q = 1d0
-            t = 0d0
-            t(1,1) = Q
-            
+            t = 0d0; t(1,1) = Q
             call makeA(rho, eps22, eps11, e24, e15, c44, c55, w, alfa, a)
             call makeSigma(a, sigma)
             call makeP(sigma, a, p)
             call makeB(h, eps0, eps22, e24, c44, alfa, p, sigma, B)
             call STAR5(B,t,C,R,4,4,1,2)
-            
             do i = 1, n
                 call makeU(z(i), sigma, t, U)
                 s(i) = U*exp(-ci*alfa*x(i)) + U*exp(ci*alfa*x(i))
@@ -172,70 +106,44 @@ contains
     END SUBROUTINE u_integrand
     
     
-    
-
-    
     SUBROUTINE plotU
     implicit none
-    integer Ndz, i
-    real*8 t1,t2,t3,t4,tm,tp,eps,step,IntLimit, dz(10)
-        open(1, file='u.txt', FORM='FORMATTED')
-        w = 5d0*2d0*pi
-        t1 = 0d0 
-        t2 = 0d0 
-        t3 = 0d0 
-        t4 = 0d0 
-        tm = 2d-2 
-        tp = 0d0 
-        eps = 1d-6
-        step = 1d-2 
-        IntLimit = 1d5
-        call Hamin(haminDelta,dzetaMin, dzetaMax, haminStep, haminEps, 10, dz, Ndz)
-        t1 = dz(1)*0.5d0; t2=t1; t3 = t1;
-        t4 = dz(Ndz)+1.5d0
-        call dinn5(u_integrand,t1,t2,t3,t4,tm,tp,eps,step,IntLimit,200,u)  
-        do i = 1, 200
-            write(1, '(10E15.6E3)') x(i), z(i), real(u(i)), imag(u(i)), abs(u(i))
-        enddo
-        close(1)
+    integer Ndz, i, j, m
+    real*8 t1,t2,t3,t4,tm,tp,eps,step,IntLimit, dz(10), ht
+    complex*16 K(pointsNum), Usym(pointsNum)
+        open(1, file='u.txt', FORM='FORMATTED'); open(2, file='uRes.txt', FORM='FORMATTED');
+        write(1, '(A)') "% x(i), z(i), f(m), real(u(i)), imag(u(i)), abs(u(i))"; write(2, '(A)') "% x(i), z(i), f(m), real(u(i)), imag(u(i)), abs(u(i))";
+        do m = 1, freqNum
+            w = f(m)*2d0*pi;
+            ht = 1d-4
+            call Hamin(haminDelta,dzetaMin, dzetaMax, haminStep, haminEps, 10, dz, Ndz)
+            tm = 2d-1; tp = 0d0; eps = 1d-6; step = 1d-2; IntLimit = 1d5   
+            t1 = dz(1)*0.5d0; t2=t1; t3 = t1; t4 = dz(Ndz)+1.5d0;
+            call dinn5(u_integrand,t1,t2,t3,t4,tm,tp,eps,step,IntLimit,pointsNum,u)  
+            uRes = 0d0
+            do i = 1, Ndz
+                call resK(h, eps0, eps11, eps22, e15, e24, c44, c55, rho, w, dz(i), ht, K, z, pointsNum)
+                do j = 1, pointsNum
+                    if (x(j)<0d0) then
+                        Usym(j) = ci*K(j)*exp(-(0d0,1d0)*dz(i)*x(j))
+                    else
+                        Usym(j) = ci*K(j)*exp((0d0,1d0)*dz(i)*x(j))
+                    endif
+                enddo 
+                uRes = uRes + Usym
+            enddo
+            do i = 1, pointsNum
+                write(1, '(10E15.6E3)') x(i), z(i), f(m), real(u(i)), imag(u(i)), abs(u(i))
+                write(2, '(10E15.6E3)') x(i), z(i), f(m), real(uRes(i)), imag(uRes(i)), abs(uRes(i))
+            enddo
+        enddo    
+        close(1); close(2); 
     END SUBROUTINE plotU
     
-    
-    
-    
-    
-    SUBROUTINE plotUres
-    implicit none
-    integer Ndz, i, j
-    real*8 dz(10), ht
-    complex*16 K(200), Usym(200)
-    complex*16 sigma(2), Q, t(4,1), a(4), p(2), B(4,4), C(4,4), R(4,4)
-        open(1, file='uRes.txt', FORM='FORMATTED')
-        w = 5d0*2d0*pi
-        call Hamin(haminDelta,dzetaMin, dzetaMax, haminStep, haminEps, 10, dz, Ndz)
-        u = 0d0
-        
-        do i = 1, Ndz
+      
 
-            call resK(h, eps0, eps11, eps22, e15, e24, c44, c55, rho, w, dz(i), 1d-5, K, z, 200)
-            do j = 1, 200
-                if (x(j)<0d0) then
-                    Usym(j) = K(j)*exp(-(0d0,1d0)*dz(i)*x(j))
-                else
-                    Usym(j) = K(j)*exp((0d0,1d0)*dz(i)*x(j))
-                endif
-            enddo 
-                       
-            u = u + Usym
-        enddo
-        
-        u = (0d0,1d0)*u
-        
-        do i = 1, 200
-            write(1, '(10E15.6E3)') x(i), z(i), real(u(i)), imag(u(i)), abs(u(i))
-        enddo
-        close(1)
-    END SUBROUTINE plotUres
+    
+    
     
     !!  T E S T   R O U T I N E S 
     
@@ -268,8 +176,8 @@ contains
         IntLimit = 1d5
         t1 = 1d0; t2=t1; t3 = t1;
         t4 = 3d0
-        call dinn5(test_integrand,t1,t2,t3,t4,tm,tp,eps,step,IntLimit,200,u)  
-        do i = 1, 200
+        call dinn5(test_integrand,t1,t2,t3,t4,tm,tp,eps,step,IntLimit,pointsNum,u)  
+        do i = 1, pointsNum
             write(1, '(10E15.6E3)') x(i), z(i), real(u(i)), imag(u(i)), abs(u(i))
         enddo
         close(1)
@@ -287,13 +195,13 @@ contains
         u = 0d0
         ht = 1d-7
 
-        do j = 1, 200
+        do j = 1, pointsNum
             Usym(j) = ht/2d0*(1d0/( (2d0+ht)**2 - 4d0 ) - 1d0/( (2d0-ht)**2 - 4d0 ) )*cos(z(j))*exp(-ci*2d0*x(j))
         enddo 
                        
         u = (0d0,1d0)*Usym
         
-        do i = 1, 200
+        do i = 1, pointsNum
             write(1, '(10E15.6E3)') x(i), z(i), real(u(i)), imag(u(i)), abs(u(i))
         enddo
         close(1)

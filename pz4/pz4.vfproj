@@ -32,6 +32,8 @@
 		<File RelativePath=".\Dinn5.f90"/>
 		<File RelativePath=".\fields.f90"/>
 		<File RelativePath=".\Hamin.f90"/>
+		<File RelativePath=".\Nedospasov_deltas.f90"/>
+		<File RelativePath=".\outPoints.f90"/>
 		<File RelativePath=".\pz4.f90"/>
 		<File RelativePath=".\Star5m.f90"/>
 		<File RelativePath=".\tMaking.f90"/>
