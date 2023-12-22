@@ -32,7 +32,7 @@ integer i, pointsNum, freqNum
     h = 5d0; d = h/2;
     rho = 4.630d0
             
-    fmin = 0d0; fmax = 3.5d0; fstep = 1d-4; ! disp curves settings                               A L L    P O I N T S
+    fmin = 0.055d0; fmax = 0.4508d0; fstep = (fmax-fmin)/100; ! disp curves settings                               A L L    P O I N T S
     
     !fmin = 2.9d0; fmax = fmin + 0.2d0; fstep = 1d-4; ! disp curves settings                               D E T A I L S     P O I N T S
     
@@ -44,7 +44,7 @@ integer i, pointsNum, freqNum
     x = [(-5.05d0+5d-2*i, i = 1, pointsNum)]; z = -h;
     f = [(0d0+2d-2*i, i = 1, freqNum)]
 
-    call plotDcurves(fmin, fmax, fstep, dzetaMin, dzetaMax, haminStep, haminEps)
+    call separateDcurves(fmin, fmax, fstep, dzetaMin, dzetaMax, haminStep, haminEps)
     !call testBoundary(-5d0, 5d0, 0.5d-1)
     !call plotU
     !call testEq
@@ -76,16 +76,60 @@ contains
         call outPoints(c44, e24, eps22, rho, h, 4)
         open(1, file='dCurves.txt', FORM='FORMATTED'); write(1, '(A)') "% f, dz, f/dz, dz/f, residue";
         do f = fmin, fmax, fstep
-            w = 2d0*pi*f; z = -d*1d-3;
+            w = 2d0*pi*f; z = 0d0;
             call Hamin(haminDelta,smin,smax,hs,eps,10,dz,Ndz)
             do i = 1, Ndz
                 call resK(h, eps0, eps11, eps22, e15, e24, c44, c55, rho, w, dz(i), 1d-4, res, z, 1) !  *   *  *   проверка полюсов вычетом
-                !if ( abs(res(1)) > 1d-4 ) 
-                write(1, '(7E15.6E3)') f, dz(i), f/dz(i),  dz(i)/f, abs(res(1)), Ndz*1d0 
+                if ( abs(res(1)) > 1d-4 ) write(1, '(7E15.6E3)') f, dz(i), f/dz(i),  dz(i)/f, abs(res(1)), Ndz*1d0 
             enddo
         enddo 
         close(1)
-    end subroutine plotDcurves       
+    end subroutine plotDcurves 
+    
+    
+    subroutine separateDcurves(fmin, fmax, fstep, smin,smax,hs,eps)
+    implicit none
+    real*8 fmin, fmax, fstep, smin,smax,hs,eps, dz(10), z(1), f
+    complex*16 res(1) 
+    integer Ndz, i, nonZeroDz
+        call outPoints(c44, e24, eps22, rho, h, 4)
+        open(1, file='sepCurves.txt', FORM='FORMATTED'); write(1, '(A)') "% f, dz";
+        open(2, file='curve1.txt', FORM='FORMATTED'); !write(2, '(7E15.6E3)') 0d0, 0d0, 0d0, 0d0;
+        open(3, file='curve2.txt', FORM='FORMATTED'); !write(3, '(7E15.6E3)') 0d0, 0d0, 0d0, 0d0;
+        open(4, file='curve3.txt', FORM='FORMATTED'); !write(4, '(7E15.6E3)') 0d0, 0d0, 0d0, 0d0;
+        open(5, file='curve4.txt', FORM='FORMATTED'); !write(5, '(7E15.6E3)') 0d0, 0d0, 0d0, 0d0;
+        open(6, file='curve5.txt', FORM='FORMATTED'); !write(6, '(7E15.6E3)') 0d0, 0d0, 0d0, 0d0;
+        open(7, file='curve6.txt', FORM='FORMATTED'); !write(7, '(7E15.6E3)') 0d0, 0d0, 0d0, 0d0;
+        open(8, file='curve7.txt', FORM='FORMATTED'); !write(8, '(7E15.6E3)') 0d0, 0d0, 0d0, 0d0;
+        open(9, file='curve8.txt', FORM='FORMATTED'); !write(9, '(7E15.6E3)') 0d0, 0d0, 0d0, 0d0;
+        
+        do f = fmin, fmax, fstep
+            w = 2d0*pi*f; z = 0d0;
+            nonZeroDz = 0
+            call Hamin(haminDelta,smin,smax,hs,eps,10,dz,Ndz)
+            do i = 1, Ndz
+                call resK(h, eps0, eps11, eps22, e15, e24, c44, c55, rho, w, dz(i), 1d-4, res, z, 1) !  *   *   *   проверка полюсов вычетом
+                if ( abs(res(1)) > 1d-4 ) then
+                    nonZeroDz = nonZeroDz + 1;
+                else 
+                    dz(i) = 0d0; 
+                endif
+            enddo
+            dz = pack(dz, dz>0d0)
+            
+            do i = 1, nonZeroDz
+                call resK(h, eps0, eps11, eps22, e15, e24, c44, c55, rho, w, dz(i), 1d-4, res, z, 1)
+                write(1, '(7E15.6E3)') f, dz(i), nonZeroDz*1d0, abs(res(1))
+                write(i+1, '(7E15.6E3)') f, dz(i), nonZeroDz*1d0, abs(res(1))
+            enddo          
+        enddo 
+        close(1)
+    end subroutine separateDcurves
+    
+    
+    
+    
+    
     
     SUBROUTINE u_integrand(alfa, s, n)
         implicit none;
