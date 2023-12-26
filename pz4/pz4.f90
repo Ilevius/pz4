@@ -6,7 +6,7 @@ complex*16 ci
 real*8 h, d, rho, eps0, eps22, eps11, e24, e15, c44, c55, w, pi
 parameter (pi=3.141592653589793d0)
 parameter (ci = (0d0,1d0))
-real*8 fmin, fmax, fstep, dzetaMin, dzetaMax, haminStep, haminEps
+real*8 fmin, fmax, fstep, dzetaMin, dzetaMax, haminStep, haminEps, DispSurferStep, DispSurferf, DispSurferDzeta
 real*8, allocatable :: x(:), z(:), f(:)
 complex*16, allocatable ::  u(:), uRes(:)
 integer i, pointsNum, freqNum
@@ -32,7 +32,7 @@ integer i, pointsNum, freqNum
     h = 5d0; d = h/2;
     rho = 4.630d0
             
-    fmin = 0.055d0; fmax = 0.4508d0; fstep = (fmax-fmin)/100; ! disp curves settings                               A L L    P O I N T S
+    fmin = 2.2544d0; fmax = 2.684d0; fstep = (fmax-fmin)/100; ! disp curves settings                               A L L    P O I N T S
     
     !fmin = 2.9d0; fmax = fmin + 0.2d0; fstep = 1d-4; ! disp curves settings                               D E T A I L S     P O I N T S
     
@@ -42,9 +42,9 @@ integer i, pointsNum, freqNum
     pointsNum = 1; freqNum = 300;
     allocate(x(pointsNum), z(pointsNum), u(pointsNum), uRes(pointsNum), f(freqNum))
     x = [(-5.05d0+5d-2*i, i = 1, pointsNum)]; z = -h;
-    f = [(0d0+2d-2*i, i = 1, freqNum)]
+    f = [(0d0+0.6d-2*i, i = 1, freqNum)]
 
-    call separateDcurves(fmin, fmax, fstep, dzetaMin, dzetaMax, haminStep, haminEps)
+    !call separateDcurves(fmin, fmax, fstep, dzetaMin, dzetaMax, haminStep, haminEps)
     !call testBoundary(-5d0, 5d0, 0.5d-1)
     !call plotU
     !call testEq
@@ -52,6 +52,8 @@ integer i, pointsNum, freqNum
     !call testBound
     !call plotTestField
     !call plotTestRes   
+    !call plotResModSum
+    call DispSurfer(1.3527d0, 1d-2, 400)
     
 contains   
     real*8 function haminDelta(alfa)
@@ -67,6 +69,9 @@ contains
         call STAR5(B,t,C,R,4,4,1,3) 
         haminDelta = 1d0/(  abs(t(1,1)) + abs(t(2,1)) + abs(t(3,1)) + abs(t(4,1))  ) 
     end
+    
+    
+    
      
     subroutine plotDcurves(fmin, fmax, fstep, smin,smax,hs,eps)
     implicit none
@@ -94,14 +99,14 @@ contains
     integer Ndz, i, nonZeroDz
         call outPoints(c44, e24, eps22, rho, h, 4)
         open(1, file='sepCurves.txt', FORM='FORMATTED'); write(1, '(A)') "% f, dz";
-        open(2, file='curve1.txt', FORM='FORMATTED'); !write(2, '(7E15.6E3)') 0d0, 0d0, 0d0, 0d0;
-        open(3, file='curve2.txt', FORM='FORMATTED'); !write(3, '(7E15.6E3)') 0d0, 0d0, 0d0, 0d0;
-        open(4, file='curve3.txt', FORM='FORMATTED'); !write(4, '(7E15.6E3)') 0d0, 0d0, 0d0, 0d0;
-        open(5, file='curve4.txt', FORM='FORMATTED'); !write(5, '(7E15.6E3)') 0d0, 0d0, 0d0, 0d0;
-        open(6, file='curve5.txt', FORM='FORMATTED'); !write(6, '(7E15.6E3)') 0d0, 0d0, 0d0, 0d0;
-        open(7, file='curve6.txt', FORM='FORMATTED'); !write(7, '(7E15.6E3)') 0d0, 0d0, 0d0, 0d0;
-        open(8, file='curve7.txt', FORM='FORMATTED'); !write(8, '(7E15.6E3)') 0d0, 0d0, 0d0, 0d0;
-        open(9, file='curve8.txt', FORM='FORMATTED'); !write(9, '(7E15.6E3)') 0d0, 0d0, 0d0, 0d0;
+        open(2, file='curve1.txt', FORM='FORMATTED'); write(2, '(7E15.6E3)') 0d0, 0d0, 0d0, 0d0;
+        open(3, file='curve2.txt', FORM='FORMATTED'); write(3, '(7E15.6E3)') 0d0, 0d0, 0d0, 0d0;
+        open(4, file='curve3.txt', FORM='FORMATTED'); write(4, '(7E15.6E3)') 0d0, 0d0, 0d0, 0d0;
+        open(5, file='curve4.txt', FORM='FORMATTED'); write(5, '(7E15.6E3)') 0d0, 0d0, 0d0, 0d0;
+        open(6, file='curve5.txt', FORM='FORMATTED'); write(6, '(7E15.6E3)') 0d0, 0d0, 0d0, 0d0;
+        open(7, file='curve6.txt', FORM='FORMATTED'); write(7, '(7E15.6E3)') 0d0, 0d0, 0d0, 0d0;
+        open(8, file='curve7.txt', FORM='FORMATTED'); write(8, '(7E15.6E3)') 0d0, 0d0, 0d0, 0d0;
+        open(9, file='curve8.txt', FORM='FORMATTED'); write(9, '(7E15.6E3)') 0d0, 0d0, 0d0, 0d0;
         
         do f = fmin, fmax, fstep
             w = 2d0*pi*f; z = 0d0;
@@ -127,7 +132,48 @@ contains
     end subroutine separateDcurves
     
     
+    subroutine DispSurfer(cutOff, step, pointsNum)
+    implicit none
+    integer pointsNum, Ndz, i, choice
+    real*8 cutOff, step, f(pointsNum), dzeta(pointsNum), dz(10), psi
+!                                                                    первые шаги, подготовка к автоматике    
+        f(1) = cutOff; dzeta(1) = 0d0; 
+        DispSurferStep = step; DispSurferf = cutOff; DispSurferDzeta = 0d0;
+        call Hamin(arcDelta,0d0,pi,1d-3,1d-5,10,dz,Ndz)
+        dzeta(2) = sin(dz(1))*DispSurferStep + DispSurferDzeta; f(2) = cos(dz(1))*DispSurferStep + DispSurferf;
+!                                                                   автоматический режим        
+        do i = 3, pointsNum
+            DispSurferf = f(i-1); DispSurferDzeta = dzeta(i-1);     ! задаем точку, откуда ищем полюса 
+            psi = atan( (f(i-1)-f(i-2))/(dzeta(i-1)-dzeta(i-2)) );  ! находим пи - азимут курса
+            call Hamin(arcDelta,-psi,pi-psi,1d-3,1d-5,10,dz,Ndz)
+            choice = 1
+            dzeta(i) = sin(dz(choice))*DispSurferStep + DispSurferDzeta; f(i) = cos(dz(choice))*DispSurferStep + DispSurferf;
+        enddo 
+!                                                                   вывод результатов        
+        open(1, file='dispSurfer.txt', FORM='FORMATTED');
+        do i = 1, pointsNum
+            write(1, '(5E15.6E3)') f(i), dzeta(i), 0d0, 0d0
+        enddo
+        close(1)
+    end subroutine DispSurfer
     
+    
+    
+    real*8 function arcDelta(angle)
+    implicit none
+    real*8 angle, alfa
+    complex*16 alfa_c, C(4,4), R(4,4),  a(4), sigma(2), p(2), B(4,4), t(4,1)
+        alfa = sin(angle)*DispSurferStep + DispSurferDzeta
+        w = 2d0*pi*(cos(angle)*DispSurferStep + DispSurferf)
+        alfa_c = alfa*(1d0,0d0)
+        t(1,1) = 1d0; t(2,1) = 0d0; t(3,1) = 0d0; t(4,1) = 0d0
+        call makeA(rho, eps22, eps11, e24, e15, c44, c55, w, alfa_c, a)
+        call makeSigma(a, sigma)
+        call makeP(sigma, a, p)
+        call makeB(h, eps0, eps22, e24, c44, alfa_c, p, sigma, B)
+        call STAR5(B,t,C,R,4,4,1,3) 
+        arcDelta = 1d0/(  abs(t(1,1)) + abs(t(2,1)) + abs(t(3,1)) + abs(t(4,1))  ) 
+    end
     
     
     
@@ -186,6 +232,30 @@ contains
     
       
 
+    
+    
+    SUBROUTINE plotResModSum
+    implicit none
+    integer Ndz, i, j, m
+    real*8 z(1), dz(10), ht, resSum
+    complex*16 K(1), Usym(pointsNum)
+        open(1, file='ResModSum.txt', FORM='FORMATTED');
+        write(1, '(A)') "% f(i), residues abs sum"; 
+        do m = 1, freqNum
+            w = f(m)*2d0*pi;
+            ht = 1d-4
+            z = 0d0
+            call Hamin(haminDelta,dzetaMin, dzetaMax, haminStep, haminEps, 10, dz, Ndz)
+            resSum = 0d0
+            do i = 1, Ndz
+                call resK(h, eps0, eps11, eps22, e15, e24, c44, c55, rho, w, dz(i), ht, K, z, 1)
+                resSum = resSum + abs(K(1))
+            enddo
+            write(1, '(3E15.6E3)') f(m), resSum
+        enddo    
+        close(1); close(2); 
+    END SUBROUTINE plotResModSum
+    
     
     
     

@@ -14,7 +14,9 @@ Scutoff_x = outPoints(1:4,1); Scutoff_y = outPoints(1:4,2);
 
 
 IMMIstyle()
-plot(dzetas(:,1), dzetas(:,3), '.', Scutoff_x, Scutoff_y, '*r', Acutoff_x, Acutoff_y, 'xr')
+plot(dzetas(:,1), dzetas(:,2), '.', Scutoff_x, Scutoff_y, '*r', Acutoff_x, Acutoff_y, 'xr')
+line1 = [2.70537 2.70537]; line2 = [0 6];
+line(line1, line2,'Color','red','LineStyle','--')
 xlabel('f')
 ylabel('\zeta')
 % xticks([1 2 3 4 5])
