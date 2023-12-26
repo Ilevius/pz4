@@ -10,8 +10,10 @@ sum = load("C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\ResModS
 
 % asAll = S0 + A0 + S1 + A1;
 IMMIstyle();
-plot(S0(:,1), S0(:,2), '.', A0(:,1), A0(:,2), '.', S1(:,1), S1(:,2), '.', A1(:,1), A1(:,2), '.', S2(:,1), S2(:,2), '.', A2(:,1), A2(:,2), '.', sum(:,1), sum(:,2), '-', ds(:,1), ds(:,2), '.')
+plot(S0(:,1), S0(:,2), '.', A0(:,1), A0(:,2), '.', S1(:,1), S1(:,2), '.', A1(:,1), A1(:,2), '.', S2(:,1), S2(:,2), '.', A2(:,1), A2(:,2), '.', sum(:,1), sum(:,2), '-', ds(:,1), ds(:,2), '.b')
 legend('S0', 'A0', 'S1', 'A1', "S2", 'A2')
+% plot(S1(:,1), S1(:,2), 'x', ds(:,1), ds(:,2), '.');
+% legend('old tech','Disp surfer')
 xlabel('f');
 ylabel('\zeta');
 % ylim([0 0.012])
