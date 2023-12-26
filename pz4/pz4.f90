@@ -57,12 +57,33 @@ integer i, pointsNum, freqNum
     !symm
     !call DispSurfer(0.055d0, 0.0673132d0, 1d-3, 5000)        ! S0           ok
     !call DispSurfer(0.901789d0, 0d0, 1d-3, 4500)             ! S1           ok
-    !call DispSurfer(1.80358d0, 0d0, 1d-3, 4000)              ! S2           bad
+    !call DispSurfer(1.80801d0, 0.265015d0, 1d-3, 4000)         ! S2           bad
     
     ! antisymm
     !call DispSurfer(0.450894d0, 0d0, 1d-3, 5000)             ! A0           ok
     !call DispSurfer(1.35268d0, 0d0, 1d-3, 4500)              ! A1           ok
     !call DispSurfer(2.25447d0, 0d0, 1d-3, 4000)              ! A2           ok
+    
+    open(1, file="C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\DispSurfer2\S0.txt", FORM='FORMATTED');
+    open(2, file="C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\DispSurfer2\S1.txt", FORM='FORMATTED');
+    open(3, file="C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\DispSurfer2\S2.txt", FORM='FORMATTED');
+    
+    open(4, file="C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\DispSurfer2\A0.txt", FORM='FORMATTED');
+    open(5, file="C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\DispSurfer2\A1.txt", FORM='FORMATTED');
+    open(6, file="C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\DispSurfer2\A2.txt", FORM='FORMATTED');
+    call DispSurfer2(0.055d0, 0.0673132d0, 1d-3, 3.5d0, 1);
+    print*, "S0 done"
+    call DispSurfer2(0.901789d0, 0d0, 1d-3, 3.5d0, 2);
+    print*, "S1 done"
+    call DispSurfer2(1.80801d0, 0.265015d0, 1d-3, 3.5d0, 3);
+    print*, "S2 done"
+    call DispSurfer2(0.450894d0, 0d0, 1d-3, 3.5d0, 4);
+    print*, "A0 done"
+    call DispSurfer2(1.35268d0, 0d0, 1d-3, 3.5d0, 5);
+    print*, "A1 done"
+    call DispSurfer2(2.25447d0, 0d0, 1d-3, 3.5d0, 6);
+    print*, "A2 done"
+    close(1); close(2); close(3); close(4); close(5); close(6);
     
     
 contains   
@@ -142,6 +163,8 @@ contains
     end subroutine separateDcurves
     
     
+    
+    
     subroutine DispSurfer(cutOffx, cutOffy, step, pointsNum)
     implicit none
     integer pointsNum, Ndz, i, choice, iterno, j
@@ -177,7 +200,7 @@ contains
         enddo 
 !                                                                   вывод результатов        
         open(1, file='dispSurfer.txt', FORM='FORMATTED');
-        do i = 1, pointsNum
+        do i = 2, pointsNum
             w = 2d0*pi*f(i)
             z= 0d0;
             call resK(h, eps0, eps11, eps22, e15, e24, c44, c55, rho, w, dzeta(i), 1d-4, res, z, 1)
@@ -186,7 +209,47 @@ contains
         close(1)
     end subroutine DispSurfer
     
-    
+    subroutine DispSurfer2(startf, startDzeta, step, fmax, file)
+    implicit none
+    integer  Ndz, choice, iterno, j, file
+    real*8 startf, startDzeta, newf, newdzeta, step, fmax, dz(4), psi, z(1)
+    complex*16 res(1)
+!                                                                    первые шаги, подготовка к автоматике  
+        z= 0d0;
+        DispSurferStep = step; DispSurferf = startf; DispSurferDzeta = startDzeta;
+        call Hamin(arcDelta, 0d0, pi, 1d-3, 1d-7, 10, dz, Ndz)
+        newdzeta = sin(dz(1))*DispSurferStep + DispSurferDzeta; newf = cos(dz(1))*DispSurferStep + DispSurferf;
+        psi = atan( (newf-DispSurferf)/(newdzeta-DispSurferDzeta) );      
+        w = 2d0*pi*newf;        
+        call resK(h, eps0, eps11, eps22, e15, e24, c44, c55, rho, w, newdzeta, 1d-4, res, z, 1)
+        write(file, '(4E15.6E3)') newf, newdzeta, 0d0, abs(res(1))
+        DispSurferf = newf; DispSurferDzeta = newdzeta;
+!                                                                   автоматический режим 
+        do 
+            iterno = 0;
+            do
+                call Hamin(arcDelta, -psi, pi-psi, 1d-3, 1d-7, 4, dz, Ndz)
+                if (Ndz>1) then
+                    print*, Ndz
+                    choice = 1; 
+                    do j = 2, Ndz
+                        if ( abs(dz(j)-(pi/2d0 - psi)) < abs(dz(j-1)-(pi/2d0 - psi)) ) choice = j
+                    enddo
+                    exit;
+                else
+                    if (DispSurferStep < step) DispSurferStep = DispSurferStep*2d0
+                    choice = 1; exit;
+                endif    
+                iterno = iterno + 1; if (iterno > 5) exit;
+            enddo
+            newdzeta = sin(dz(choice))*DispSurferStep + DispSurferDzeta; newf = cos(dz(choice))*DispSurferStep + DispSurferf;
+            w = 2d0*pi*newf;        
+            call resK(h, eps0, eps11, eps22, e15, e24, c44, c55, rho, w, newdzeta, 1d-4, res, z, 1)
+            write(file, '(4E15.6E3)') newf, newdzeta, 0d0, abs(res(1))
+            psi = atan( (newf-DispSurferf)/(newdzeta-DispSurferDzeta) ); DispSurferf = newf; DispSurferDzeta = newdzeta;
+            if (newf>fmax) exit;
+        enddo 
+    end subroutine DispSurfer2
     
     real*8 function arcDelta(angle)
     implicit none
