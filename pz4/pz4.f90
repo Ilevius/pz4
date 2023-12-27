@@ -52,8 +52,7 @@ integer i, pointsNum, freqNum
     !call plotTestField
     !call plotTestRes   
     !call plotResModSum
-    
-    !call plotAllCurves
+    call plotAllCurves
     
 contains   
     real*8 function haminDelta(alfa)
@@ -107,11 +106,12 @@ contains
         call DispSurfer2(0.055d0, 0.0673132d0, 1d-3, 3.5d0, 1); print*, "S0 done";
         call DispSurfer2(0.901789d0, 0d0, 1d-3, 3.5d0, 2); print*, "S1 done";
         call DispSurfer2(1.80801d0, 0.265015d0, 1d-3, 3.5d0, 3); print*, "S2 done";
-    
+        
         call DispSurfer2(0.450894d0, 0d0, 1d-3, 3.5d0, 4); print*, "A0 done";
         call DispSurfer2(1.35268d0, 0d0, 1d-3, 3.5d0, 5); print*, "A1 done";
         call DispSurfer2(2.25447d0, 0d0, 1d-3, 3.5d0, 6); print*, "A2 done";
-    
+            
+
         close(1); close(2); close(3); close(4); close(5); close(6);
     end subroutine plotAllCurves
     
@@ -122,17 +122,17 @@ contains
     integer  Ndz, choice, iterno, j, file
     real*8 startf, startDzeta, newf, newdzeta, step, fmax, dz(4), psi, z(1)
     complex*16 res(1)
-        z= 0d0;      !                                                                    первые шаги, подготовка к автоматике
+        !                                                                    первые шаги, подготовка к автоматике
         DispSurferStep = step; DispSurferf = startf; DispSurferDzeta = startDzeta;
         call Hamin(arcDelta, 0d0, pi, 1d-3, 1d-7, 10, dz, Ndz)
         newdzeta = sin(dz(1))*DispSurferStep + DispSurferDzeta; newf = cos(dz(1))*DispSurferStep + DispSurferf;
         psi = atan( (newf-DispSurferf)/(newdzeta-DispSurferDzeta) );      
-        w = 2d0*pi*newf;        
+        w = 2d0*pi*newf; z= 0d0;       
         call resK(h, eps0, eps11, eps22, e15, e24, c44, c55, rho, w, newdzeta, 1d-4, res, z, 1)
         write(file, '(4E15.6E3)') newf, newdzeta, 0d0, abs(res(1))
         DispSurferf = newf; DispSurferDzeta = newdzeta;
         do !                                                                   автоматический режим
-            iterno = 0;
+            iterno= 0;
             do
                 call Hamin(arcDelta, -psi, pi-psi, 1d-3, 1d-7, 4, dz, Ndz)
                 if (Ndz>1) then
@@ -144,12 +144,12 @@ contains
                     exit;
                 else
                     if (DispSurferStep < step) DispSurferStep = DispSurferStep*2d0
-                    choice = 1; exit;
+                     choice = 1; exit;
                 endif    
                 iterno = iterno + 1; if (iterno > 5) exit;
             enddo
             newdzeta = sin(dz(choice))*DispSurferStep + DispSurferDzeta; newf = cos(dz(choice))*DispSurferStep + DispSurferf;
-            w = 2d0*pi*newf;        
+            w = 2d0*pi*newf; z= 0d0;        
             call resK(h, eps0, eps11, eps22, e15, e24, c44, c55, rho, w, newdzeta, 1d-4, res, z, 1)
             write(file, '(4E15.6E3)') newf, newdzeta, 0d0, abs(res(1))
             psi = atan( (newf-DispSurferf)/(newdzeta-DispSurferDzeta) ); DispSurferf = newf; DispSurferDzeta = newdzeta;
@@ -256,6 +256,56 @@ contains
         close(1); close(2); 
     END SUBROUTINE plotResModSum
     
+    
+    
+    
+    
+    
+    
+    
+    subroutine DispSurfer(cutOffx, cutOffy, step, pointsNum)
+    implicit none
+    integer pointsNum, Ndz, i, choice, iterno, j
+    real*8 cutOffx, cutOffy, step, f(pointsNum), dzeta(pointsNum), dz(4), psi, z(1)
+    complex*16 res(1)
+!                                                                    первые шаги, подготовка к автоматике    
+        f(1) = cutOffx; dzeta(1) = cutOffy; 
+        DispSurferStep = step; DispSurferf = f(1); DispSurferDzeta = dzeta(1);
+        call Hamin(arcDelta, 0d0, pi, 1d-3, 1d-7, 10, dz, Ndz)
+        dzeta(2) = sin(dz(1))*DispSurferStep + DispSurferDzeta; f(2) = cos(dz(1))*DispSurferStep + DispSurferf;
+!                                                                   автоматический режим 
+        i = 3; 
+        do i = 3, pointsNum
+            iterno = 0;
+            DispSurferf = f(i-1); DispSurferDzeta = dzeta(i-1);     ! задаем точку, откуда ищем полюса 
+            psi = atan( (f(i-1)-f(i-2))/(dzeta(i-1)-dzeta(i-2)) );  ! находим пи - азимут курса
+            do
+                call Hamin(arcDelta, -psi, pi-psi, 1d-3, 1d-7, 4, dz, Ndz)
+                if (Ndz>1) then
+                    print*, Ndz
+                    choice = 1; 
+                    do j = 2, Ndz
+                        if ( abs(dz(j)-(pi/2d0 - psi)) < abs(dz(j-1)-(pi/2d0 - psi)) ) choice = j
+                    enddo
+                    exit;
+                else
+                    if (DispSurferStep < step) DispSurferStep = DispSurferStep*2d0
+                    choice = 1; exit;
+                endif    
+                iterno = iterno + 1; if (iterno > 5) exit;
+            enddo
+            dzeta(i) = sin(dz(choice))*DispSurferStep + DispSurferDzeta; f(i) = cos(dz(choice))*DispSurferStep + DispSurferf;
+        enddo 
+!                                                                   вывод результатов        
+        open(1, file='dispSurfer.txt', FORM='FORMATTED');
+        do i = 1, pointsNum
+            w = 2d0*pi*f(i)
+            z= 0d0;
+            call resK(h, eps0, eps11, eps22, e15, e24, c44, c55, rho, w, dzeta(i), 1d-4, res, z, 1)
+            write(1, '(4E15.6E3)') f(i), dzeta(i), 0d0, abs(res(1))
+        enddo
+        close(1)
+    end subroutine DispSurfer
     
     
     
