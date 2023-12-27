@@ -53,10 +53,6 @@ integer i, pointsNum, freqNum
     !call plotTestRes   
     !call plotResModSum
     
-    !open(2, file="C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\DispSurfer2\S1.txt", FORM='FORMATTED');
-    !call DispSurfer2(0.901789d0, 0d0, 1d-3, 2.5d0, 2); print*, "S1 done";
-    !close(2)
-    
     !call plotAllCurves
     
 contains   
