@@ -44,7 +44,6 @@ integer i, pointsNum, freqNum
     x = [(-5.05d0+5d-2*i, i = 1, pointsNum)]; z = -h;
     f = [(0d0+0.6d-2*i, i = 1, freqNum)]
 
-    !call separateDcurves(fmin, fmax, fstep, dzetaMin, dzetaMax, haminStep, haminEps)
     !call testBoundary(-5d0, 5d0, 0.5d-1)
     !call plotU
     !call testEq
@@ -54,37 +53,11 @@ integer i, pointsNum, freqNum
     !call plotTestRes   
     !call plotResModSum
     
-    !symm
-    !call DispSurfer(0.055d0, 0.0673132d0, 1d-3, 5000)        ! S0           ok
-    !call DispSurfer(0.901789d0, 0d0, 1d-3, 4500)             ! S1           ok
-    !call DispSurfer(1.80801d0, 0.265015d0, 1d-3, 4000)         ! S2           bad
+    !open(2, file="C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\DispSurfer2\S1.txt", FORM='FORMATTED');
+    !call DispSurfer2(0.901789d0, 0d0, 1d-3, 2.5d0, 2); print*, "S1 done";
+    !close(2)
     
-    ! antisymm
-    !call DispSurfer(0.450894d0, 0d0, 1d-3, 5000)             ! A0           ok
-    !call DispSurfer(1.35268d0, 0d0, 1d-3, 4500)              ! A1           ok
-    !call DispSurfer(2.25447d0, 0d0, 1d-3, 4000)              ! A2           ok
-    
-    open(1, file="C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\DispSurfer2\S0.txt", FORM='FORMATTED');
-    open(2, file="C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\DispSurfer2\S1.txt", FORM='FORMATTED');
-    open(3, file="C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\DispSurfer2\S2.txt", FORM='FORMATTED');
-    
-    open(4, file="C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\DispSurfer2\A0.txt", FORM='FORMATTED');
-    open(5, file="C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\DispSurfer2\A1.txt", FORM='FORMATTED');
-    open(6, file="C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\DispSurfer2\A2.txt", FORM='FORMATTED');
-    call DispSurfer2(0.055d0, 0.0673132d0, 1d-3, 3.5d0, 1);
-    print*, "S0 done"
-    call DispSurfer2(0.901789d0, 0d0, 1d-3, 3.5d0, 2);
-    print*, "S1 done"
-    call DispSurfer2(1.80801d0, 0.265015d0, 1d-3, 3.5d0, 3);
-    print*, "S2 done"
-    call DispSurfer2(0.450894d0, 0d0, 1d-3, 3.5d0, 4);
-    print*, "A0 done"
-    call DispSurfer2(1.35268d0, 0d0, 1d-3, 3.5d0, 5);
-    print*, "A1 done"
-    call DispSurfer2(2.25447d0, 0d0, 1d-3, 3.5d0, 6);
-    print*, "A2 done"
-    close(1); close(2); close(3); close(4); close(5); close(6);
-    
+    !call plotAllCurves
     
 contains   
     real*8 function haminDelta(alfa)
@@ -123,99 +96,37 @@ contains
     end subroutine plotDcurves 
     
     
-    subroutine separateDcurves(fmin, fmax, fstep, smin,smax,hs,eps)
+    
+    
+    subroutine plotAllCurves
     implicit none
-    real*8 fmin, fmax, fstep, smin,smax,hs,eps, dz(10), z(1), f
-    complex*16 res(1) 
-    integer Ndz, i, nonZeroDz
-        call outPoints(c44, e24, eps22, rho, h, 4)
-        open(1, file='sepCurves.txt', FORM='FORMATTED'); write(1, '(A)') "% f, dz";
-        open(2, file='curve1.txt', FORM='FORMATTED'); write(2, '(7E15.6E3)') 0d0, 0d0, 0d0, 0d0;
-        open(3, file='curve2.txt', FORM='FORMATTED'); write(3, '(7E15.6E3)') 0d0, 0d0, 0d0, 0d0;
-        open(4, file='curve3.txt', FORM='FORMATTED'); write(4, '(7E15.6E3)') 0d0, 0d0, 0d0, 0d0;
-        open(5, file='curve4.txt', FORM='FORMATTED'); write(5, '(7E15.6E3)') 0d0, 0d0, 0d0, 0d0;
-        open(6, file='curve5.txt', FORM='FORMATTED'); write(6, '(7E15.6E3)') 0d0, 0d0, 0d0, 0d0;
-        open(7, file='curve6.txt', FORM='FORMATTED'); write(7, '(7E15.6E3)') 0d0, 0d0, 0d0, 0d0;
-        open(8, file='curve7.txt', FORM='FORMATTED'); write(8, '(7E15.6E3)') 0d0, 0d0, 0d0, 0d0;
-        open(9, file='curve8.txt', FORM='FORMATTED'); write(9, '(7E15.6E3)') 0d0, 0d0, 0d0, 0d0;
-        
-        do f = fmin, fmax, fstep
-            w = 2d0*pi*f; z = 0d0;
-            nonZeroDz = 0
-            call Hamin(haminDelta,smin,smax,hs,eps,10,dz,Ndz)
-            do i = 1, Ndz
-                call resK(h, eps0, eps11, eps22, e15, e24, c44, c55, rho, w, dz(i), 1d-4, res, z, 1) !  *   *   *   проверка полюсов вычетом
-                if ( abs(res(1)) > 1d-4 ) then
-                    nonZeroDz = nonZeroDz + 1;
-                else 
-                    dz(i) = 0d0; 
-                endif
-            enddo
-            dz = pack(dz, dz>0d0)
-            
-            do i = 1, nonZeroDz
-                call resK(h, eps0, eps11, eps22, e15, e24, c44, c55, rho, w, dz(i), 1d-4, res, z, 1)
-                write(1, '(7E15.6E3)') f, dz(i), nonZeroDz*1d0, abs(res(1))
-                write(i+1, '(7E15.6E3)') f, dz(i), nonZeroDz*1d0, abs(res(1))
-            enddo          
-        enddo 
-        close(1)
-    end subroutine separateDcurves
+        open(1, file="C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\DispSurfer2\S0.txt", FORM='FORMATTED');
+        open(2, file="C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\DispSurfer2\S1.txt", FORM='FORMATTED');
+        open(3, file="C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\DispSurfer2\S2.txt", FORM='FORMATTED');
+    
+        open(4, file="C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\DispSurfer2\A0.txt", FORM='FORMATTED');
+        open(5, file="C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\DispSurfer2\A1.txt", FORM='FORMATTED');
+        open(6, file="C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\DispSurfer2\A2.txt", FORM='FORMATTED');
+    
+        call DispSurfer2(0.055d0, 0.0673132d0, 1d-3, 3.5d0, 1); print*, "S0 done";
+        call DispSurfer2(0.901789d0, 0d0, 1d-3, 3.5d0, 2); print*, "S1 done";
+        call DispSurfer2(1.80801d0, 0.265015d0, 1d-3, 3.5d0, 3); print*, "S2 done";
+    
+        call DispSurfer2(0.450894d0, 0d0, 1d-3, 3.5d0, 4); print*, "A0 done";
+        call DispSurfer2(1.35268d0, 0d0, 1d-3, 3.5d0, 5); print*, "A1 done";
+        call DispSurfer2(2.25447d0, 0d0, 1d-3, 3.5d0, 6); print*, "A2 done";
+    
+        close(1); close(2); close(3); close(4); close(5); close(6);
+    end subroutine plotAllCurves
     
     
-    
-    
-    subroutine DispSurfer(cutOffx, cutOffy, step, pointsNum)
-    implicit none
-    integer pointsNum, Ndz, i, choice, iterno, j
-    real*8 cutOffx, cutOffy, step, f(pointsNum), dzeta(pointsNum), dz(4), psi, z(1)
-    complex*16 res(1)
-!                                                                    первые шаги, подготовка к автоматике    
-        f(1) = cutOffx; dzeta(1) = cutOffy; 
-        DispSurferStep = step; DispSurferf = f(1); DispSurferDzeta = dzeta(1);
-        call Hamin(arcDelta, 0d0, pi, 1d-3, 1d-7, 10, dz, Ndz)
-        dzeta(2) = sin(dz(1))*DispSurferStep + DispSurferDzeta; f(2) = cos(dz(1))*DispSurferStep + DispSurferf;
-!                                                                   автоматический режим 
-        i = 3; 
-        do i = 3, pointsNum
-            iterno = 0;
-            DispSurferf = f(i-1); DispSurferDzeta = dzeta(i-1);     ! задаем точку, откуда ищем полюса 
-            psi = atan( (f(i-1)-f(i-2))/(dzeta(i-1)-dzeta(i-2)) );  ! находим пи - азимут курса
-            do
-                call Hamin(arcDelta, -psi, pi-psi, 1d-3, 1d-7, 4, dz, Ndz)
-                if (Ndz>1) then
-                    print*, Ndz
-                    choice = 1; 
-                    do j = 2, Ndz
-                        if ( abs(dz(j)-(pi/2d0 - psi)) < abs(dz(j-1)-(pi/2d0 - psi)) ) choice = j
-                    enddo
-                    exit;
-                else
-                    if (DispSurferStep < step) DispSurferStep = DispSurferStep*2d0
-                    choice = 1; exit;
-                endif    
-                iterno = iterno + 1; if (iterno > 5) exit;
-            enddo
-            dzeta(i) = sin(dz(choice))*DispSurferStep + DispSurferDzeta; f(i) = cos(dz(choice))*DispSurferStep + DispSurferf;
-        enddo 
-!                                                                   вывод результатов        
-        open(1, file='dispSurfer.txt', FORM='FORMATTED');
-        do i = 2, pointsNum
-            w = 2d0*pi*f(i)
-            z= 0d0;
-            call resK(h, eps0, eps11, eps22, e15, e24, c44, c55, rho, w, dzeta(i), 1d-4, res, z, 1)
-            write(1, '(4E15.6E3)') f(i), dzeta(i), 0d0, abs(res(1))
-        enddo
-        close(1)
-    end subroutine DispSurfer
     
     subroutine DispSurfer2(startf, startDzeta, step, fmax, file)
     implicit none
     integer  Ndz, choice, iterno, j, file
     real*8 startf, startDzeta, newf, newdzeta, step, fmax, dz(4), psi, z(1)
     complex*16 res(1)
-!                                                                    первые шаги, подготовка к автоматике  
-        z= 0d0;
+        z= 0d0;      !                                                                    первые шаги, подготовка к автоматике
         DispSurferStep = step; DispSurferf = startf; DispSurferDzeta = startDzeta;
         call Hamin(arcDelta, 0d0, pi, 1d-3, 1d-7, 10, dz, Ndz)
         newdzeta = sin(dz(1))*DispSurferStep + DispSurferDzeta; newf = cos(dz(1))*DispSurferStep + DispSurferf;
@@ -224,8 +135,7 @@ contains
         call resK(h, eps0, eps11, eps22, e15, e24, c44, c55, rho, w, newdzeta, 1d-4, res, z, 1)
         write(file, '(4E15.6E3)') newf, newdzeta, 0d0, abs(res(1))
         DispSurferf = newf; DispSurferDzeta = newdzeta;
-!                                                                   автоматический режим 
-        do 
+        do !                                                                   автоматический режим
             iterno = 0;
             do
                 call Hamin(arcDelta, -psi, pi-psi, 1d-3, 1d-7, 4, dz, Ndz)
@@ -250,6 +160,8 @@ contains
             if (newf>fmax) exit;
         enddo 
     end subroutine DispSurfer2
+    
+    
     
     real*8 function arcDelta(angle)
     implicit none
