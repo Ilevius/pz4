@@ -98,18 +98,30 @@ contains
         open(1, file="C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\DispSurfer2\S0.txt", FORM='FORMATTED');
         open(2, file="C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\DispSurfer2\S1.txt", FORM='FORMATTED');
         open(3, file="C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\DispSurfer2\S2.txt", FORM='FORMATTED');
+        open(4, file="C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\DispSurfer2\S3.txt", FORM='FORMATTED');
+        open(5, file="C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\DispSurfer2\S4.txt", FORM='FORMATTED');
+        open(6, file="C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\DispSurfer2\S5.txt", FORM='FORMATTED');
     
-        open(4, file="C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\DispSurfer2\A0.txt", FORM='FORMATTED');
-        open(5, file="C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\DispSurfer2\A1.txt", FORM='FORMATTED');
-        open(6, file="C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\DispSurfer2\A2.txt", FORM='FORMATTED');
+        open(7, file="C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\DispSurfer2\A0.txt", FORM='FORMATTED');
+        open(8, file="C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\DispSurfer2\A1.txt", FORM='FORMATTED');
+        open(9, file="C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\DispSurfer2\A2.txt", FORM='FORMATTED');
+        open(10, file="C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\DispSurfer2\A3.txt", FORM='FORMATTED');
+        open(11, file="C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\DispSurfer2\A4.txt", FORM='FORMATTED');
+        open(12, file="C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\DispSurfer2\A5.txt", FORM='FORMATTED');
     
-        call DispSurfer2(0.055d0, 0.0673132d0, 1d-3, 3.5d0, 1); print*, "S0 done";
-        call DispSurfer2(0.901789d0, 0d0, 1d-3, 3.5d0, 2); print*, "S1 done";
-        call DispSurfer2(1.80801d0, 0.265015d0, 1d-3, 3.5d0, 3); print*, "S2 done";
+        !call DispSurfer2(0.055d0, 0.0673132d0, 1d-3, 6d0, 1); print*, "S0 done";
+        !call DispSurfer2(0.901789d0, 0d0, 1d-3, 6d0, 2); print*, "S1 done";
+        !call DispSurfer2(1.80801d0, 0.265015d0, 1d-3, 6d0, 3); print*, "S2 done";
+        !call DispSurfer2(2.7054d0, 0.0282362d0, 1d-3, 6d0, 4); print*, "S3 done";
+        !call DispSurfer2(0.901789d0, 0d0, 1d-3, 6d0, 5); print*, "S4 done";
+        !call DispSurfer2(1.80801d0, 0.265015d0, 1d-3, 6d0, 6); print*, "S5 done";
         
-        call DispSurfer2(0.450894d0, 0d0, 1d-3, 3.5d0, 4); print*, "A0 done";
-        call DispSurfer2(1.35268d0, 0d0, 1d-3, 3.5d0, 5); print*, "A1 done";
-        call DispSurfer2(2.25447d0, 0d0, 1d-3, 3.5d0, 6); print*, "A2 done";
+        !call DispSurfer2(0.450894d0, 0d0, 1d-3, 6d0, 7); print*, "A0 done";
+        !call DispSurfer2(1.35268d0, 0d0, 1d-3, 6d0, 8); print*, "A1 done";
+        !call DispSurfer2(2.25447d0, 0d0, 1d-3, 6d0, 9); print*, "A2 done";
+        call DispSurfer2(3.1563d0, 0.0331583d0, 1d-3, 6d0, 10); print*, "A3 done";
+        !call DispSurfer2(1.35268d0, 0d0, 1d-3, 6d0, 11); print*, "A4 done";
+        !call DispSurfer2(2.25447d0, 0d0, 1d-3, 6d0, 12); print*, "A5 done";
             
 
         close(1); close(2); close(3); close(4); close(5); close(6);
