@@ -2,7 +2,7 @@ clc; clear;
 dzetas = load("C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\dCurves.txt");
 residue_min = 1e-4;
 big_residue_rows = dzetas(:,5) > residue_min;
-dzetas = dzetas(big_residue_rows, :);
+% dzetas = dzetas(big_residue_rows, :);
 
 outPoints = load("C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\cutOffASym.txt");
 Acutoff_x = outPoints(1:4,1); Acutoff_y = outPoints(1:4,2);
@@ -15,11 +15,9 @@ Scutoff_x = outPoints(1:4,1); Scutoff_y = outPoints(1:4,2);
 
 IMMIstyle()
 plot(dzetas(:,1), dzetas(:,2), '.', Scutoff_x, Scutoff_y, '*r', Acutoff_x, Acutoff_y, 'xr')
-line1 = [2.70537 2.70537]; line2 = [0 6];
-line(line1, line2,'Color','red','LineStyle','--')
 xlabel('f')
-ylabel('\zeta')
+ylabel('s')
 % xticks([1 2 3 4 5])
 
 IMMIstyle()
-% ylim([0 3])
+% ylim([0 15])

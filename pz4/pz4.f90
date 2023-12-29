@@ -32,12 +32,11 @@ integer i, pointsNum, freqNum
     h = 5d0; d = h/2;
     rho = 4.630d0
             
-    fmin = 2.2544d0; fmax = 2.684d0; fstep = (fmax-fmin)/100; ! disp curves settings                               A L L    P O I N T S
+    fmin = 0d0; fmax = 6d0; fstep = (fmax-fmin)/36000;                       ! disp curves settings        A L L    P O I N T S
     
-    !fmin = 2.9d0; fmax = fmin + 0.2d0; fstep = 1d-4; ! disp curves settings                               D E T A I L S     P O I N T S
     
      
-    dzetaMin = 0d0; dzetaMax = 6d0; haminStep = 1d-3; haminEps = 1d-7 ! Hamin settings
+    dzetaMin = 0d0; dzetaMax = 8d0; haminStep = 1d-3; haminEps = 1d-7 ! Hamin settings
 
     pointsNum = 1; freqNum = 300;
     allocate(x(pointsNum), z(pointsNum), u(pointsNum), uRes(pointsNum), f(freqNum))
@@ -52,7 +51,8 @@ integer i, pointsNum, freqNum
     !call plotTestField
     !call plotTestRes   
     !call plotResModSum
-    !call plotAllCurves(3.2d0)
+    call plotAllCurves(3.2d0)
+    !call plotDcurves(fmin, fmax, fstep, dzetaMin, dzetaMax, haminStep, haminEps)
     
 contains   
     real*8 function haminDelta(alfa)
@@ -93,9 +93,9 @@ contains
     subroutine plotAllCurves(fmax)
     implicit none
     real*8 Sf(4), Sdzeta(4), Af(4), Adzeta(4), fmax
-    namelist/Ycut/ Sf, Sdzeta, Af, Adzeta
+    namelist/Xcut/ Sf, Sdzeta, Af, Adzeta
         open(unit=1,file='startPoints.txt',status='old')
-        read(1, Ycut); close(1);
+        read(1, Xcut); close(1);
      
         open(1, file="C:\Users\tiama\OneDrive\–абочий стол\IMMI\Nedospasov\pz4\pz4\DispSurfer2\S0.txt", FORM='FORMATTED');
         open(2, file="C:\Users\tiama\OneDrive\–абочий стол\IMMI\Nedospasov\pz4\pz4\DispSurfer2\S1.txt", FORM='FORMATTED');
@@ -142,7 +142,7 @@ contains
             do
                 call Hamin(arcDelta, -psi, pi-psi, 1d-3, 1d-7, 4, dz, Ndz)
                 if (Ndz>1) then
-                    print*, Ndz
+                    !print*, Ndz
                     choice = 1; 
                     do j = 2, Ndz
                         if ( abs(dz(j)-(pi/2d0 - psi)) < abs(dz(j-1)-(pi/2d0 - psi)) ) choice = j
@@ -263,57 +263,7 @@ contains
     END SUBROUTINE plotResModSum
     
     
-    
-    
-    
-    
-    
-    
-    subroutine DispSurfer(cutOffx, cutOffy, step, pointsNum)
-    implicit none
-    integer pointsNum, Ndz, i, choice, iterno, j
-    real*8 cutOffx, cutOffy, step, f(pointsNum), dzeta(pointsNum), dz(4), psi, z(1)
-    complex*16 res(1)
-!                                                                    первые шаги, подготовка к автоматике    
-        f(1) = cutOffx; dzeta(1) = cutOffy; 
-        DispSurferStep = step; DispSurferf = f(1); DispSurferDzeta = dzeta(1);
-        call Hamin(arcDelta, 0d0, pi, 1d-3, 1d-7, 10, dz, Ndz)
-        dzeta(2) = sin(dz(1))*DispSurferStep + DispSurferDzeta; f(2) = cos(dz(1))*DispSurferStep + DispSurferf;
-!                                                                   автоматический режим 
-        i = 3; 
-        do i = 3, pointsNum
-            iterno = 0;
-            DispSurferf = f(i-1); DispSurferDzeta = dzeta(i-1);     ! задаем точку, откуда ищем полюса 
-            psi = atan( (f(i-1)-f(i-2))/(dzeta(i-1)-dzeta(i-2)) );  ! находим пи - азимут курса
-            do
-                call Hamin(arcDelta, -psi, pi-psi, 1d-3, 1d-7, 4, dz, Ndz)
-                if (Ndz>1) then
-                    print*, Ndz
-                    choice = 1; 
-                    do j = 2, Ndz
-                        if ( abs(dz(j)-(pi/2d0 - psi)) < abs(dz(j-1)-(pi/2d0 - psi)) ) choice = j
-                    enddo
-                    exit;
-                else
-                    if (DispSurferStep < step) DispSurferStep = DispSurferStep*2d0
-                    choice = 1; exit;
-                endif    
-                iterno = iterno + 1; if (iterno > 5) exit;
-            enddo
-            dzeta(i) = sin(dz(choice))*DispSurferStep + DispSurferDzeta; f(i) = cos(dz(choice))*DispSurferStep + DispSurferf;
-        enddo 
-!                                                                   вывод результатов        
-        open(1, file='dispSurfer.txt', FORM='FORMATTED');
-        do i = 1, pointsNum
-            w = 2d0*pi*f(i)
-            z= 0d0;
-            call resK(h, eps0, eps11, eps22, e15, e24, c44, c55, rho, w, dzeta(i), 1d-4, res, z, 1)
-            write(1, '(4E15.6E3)') f(i), dzeta(i), 0d0, abs(res(1))
-        enddo
-        close(1)
-    end subroutine DispSurfer
-    
-    
+ 
     
     !!  T E S T   R O U T I N E S 
     
