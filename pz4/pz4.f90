@@ -11,22 +11,22 @@ real*8, allocatable :: x(:), z(:), f(:)
 complex*16, allocatable ::  u(:), uRes(:)
 integer i, pointsNum, freqNum
  !                       из письма, F/m Y cut
-    c44 = 0.743d2
-    c55 = 0.25d2   
-    e15 = 5.16d0
-    e24 = 11.7d0    
-    eps11 = 3.27d-1
-    eps22 = 6.903d0
+    !c44 = 0.743d2
+    !c55 = 0.25d2   
+    !e15 = 5.16d0
+    !e24 = 11.7d0    
+    !eps11 = 3.27d-1
+    !eps22 = 6.903d0
 
  !!                       из письма, F/m с перестановкой X cut
- !   c44 = 0.25d2
- !   c55 = 0.743d2
- !   
- !   e15 = 11.7d0
- !   e24 = 5.16d0
- !   
- !   eps11 = 6.903d0
- !   eps22 = 3.27d-1
+    c44 = 0.25d2
+    c55 = 0.743d2
+    
+    e15 = 11.7d0
+    e24 = 5.16d0
+    
+    eps11 = 6.903d0
+    eps22 = 3.27d-1
    
     eps0 = 8.85d-3
     h = 5d0; d = h/2;
@@ -52,7 +52,7 @@ integer i, pointsNum, freqNum
     !call plotTestField
     !call plotTestRes   
     !call plotResModSum
-    call plotAllCurves
+    !call plotAllCurves(3.2d0)
     
 contains   
     real*8 function haminDelta(alfa)
@@ -68,9 +68,6 @@ contains
         call STAR5(B,t,C,R,4,4,1,3) 
         haminDelta = 1d0/(  abs(t(1,1)) + abs(t(2,1)) + abs(t(3,1)) + abs(t(4,1))  ) 
     end
-    
-    
-    
      
     subroutine plotDcurves(fmin, fmax, fstep, smin,smax,hs,eps)
     implicit none
@@ -93,8 +90,13 @@ contains
     
     
     
-    subroutine plotAllCurves
+    subroutine plotAllCurves(fmax)
     implicit none
+    real*8 Sf(4), Sdzeta(4), Af(4), Adzeta(4), fmax
+    namelist/Ycut/ Sf, Sdzeta, Af, Adzeta
+        open(unit=1,file='startPoints.txt',status='old')
+        read(1, Ycut); close(1);
+     
         open(1, file="C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\DispSurfer2\S0.txt", FORM='FORMATTED');
         open(2, file="C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\DispSurfer2\S1.txt", FORM='FORMATTED');
         open(3, file="C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\DispSurfer2\S2.txt", FORM='FORMATTED');
@@ -109,20 +111,12 @@ contains
         open(11, file="C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\DispSurfer2\A4.txt", FORM='FORMATTED');
         open(12, file="C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\DispSurfer2\A5.txt", FORM='FORMATTED');
     
-        !call DispSurfer2(0.055d0, 0.0673132d0, 1d-3, 6d0, 1); print*, "S0 done";
-        !call DispSurfer2(0.901789d0, 0d0, 1d-3, 6d0, 2); print*, "S1 done";
-        !call DispSurfer2(1.80801d0, 0.265015d0, 1d-3, 6d0, 3); print*, "S2 done";
-        !call DispSurfer2(2.7054d0, 0.0282362d0, 1d-3, 6d0, 4); print*, "S3 done";
-        !call DispSurfer2(0.901789d0, 0d0, 1d-3, 6d0, 5); print*, "S4 done";
-        !call DispSurfer2(1.80801d0, 0.265015d0, 1d-3, 6d0, 6); print*, "S5 done";
         
-        !call DispSurfer2(0.450894d0, 0d0, 1d-3, 6d0, 7); print*, "A0 done";
-        !call DispSurfer2(1.35268d0, 0d0, 1d-3, 6d0, 8); print*, "A1 done";
-        !call DispSurfer2(2.25447d0, 0d0, 1d-3, 6d0, 9); print*, "A2 done";
-        call DispSurfer2(3.1563d0, 0.0331583d0, 1d-3, 6d0, 10); print*, "A3 done";
-        !call DispSurfer2(1.35268d0, 0d0, 1d-3, 6d0, 11); print*, "A4 done";
-        !call DispSurfer2(2.25447d0, 0d0, 1d-3, 6d0, 12); print*, "A5 done";
-            
+        do i = 1, 4
+            call DispSurfer2(Sf(i), Sdzeta(i), 1d-3, fmax, i); print*, 'S', i-1, ' curve done';
+            call DispSurfer2(Af(i), Adzeta(i), 1d-3, fmax, i + 6); print*, 'A', i-1, ' curve done';
+        enddo
+                
 
         close(1); close(2); close(3); close(4); close(5); close(6);
     end subroutine plotAllCurves

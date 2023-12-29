@@ -8,7 +8,7 @@ A2 = load("C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\DispSurf
 S3 = load("C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\DispSurfer2\S3.txt");
 A3 = load("C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\DispSurfer2\A3.txt");
 
-column = 4;
+column = 2;
 unit = '.';
 
 IMMIstyle();
@@ -17,6 +17,6 @@ plot(S0(:,1), S0(:,column), unit, A0(:,1), A0(:,column), unit, S1(:,1), S1(:,col
 legend('S0', 'A0', 'S1', 'A1', "S2", 'A2', 'S3', 'A3')
 xlabel('f');
 ylabel('\zeta');
-ylim([0 0.015])
-xlim([0 4]);
+% ylim([0 0.015])
+% xlim([0 4]);
 IMMIstyle();
