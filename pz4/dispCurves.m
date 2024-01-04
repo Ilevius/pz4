@@ -1,5 +1,5 @@
 clc; clear;
-dzetas = load("C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\dCurves.txt");
+dzetas = load("C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\dCurves in details Ycut.txt");
 residue_min = 1e-4;
 big_residue_rows = dzetas(:,5) > residue_min;
 % dzetas = dzetas(big_residue_rows, :);

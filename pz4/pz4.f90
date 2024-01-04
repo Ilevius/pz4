@@ -11,22 +11,22 @@ real*8, allocatable :: x(:), z(:), f(:)
 complex*16, allocatable ::  u(:), uRes(:)
 integer i, pointsNum, freqNum
  !                       из письма, F/m Y cut
-    !c44 = 0.743d2
-    !c55 = 0.25d2   
-    !e15 = 5.16d0
-    !e24 = 11.7d0    
-    !eps11 = 3.27d-1
-    !eps22 = 6.903d0
+    c44 = 0.743d2
+    c55 = 0.25d2   
+    e15 = 5.16d0
+    e24 = 11.7d0    
+    eps11 = 3.27d-1
+    eps22 = 6.903d0
 
  !!                       из письма, F/m с перестановкой X cut
-    c44 = 0.25d2
-    c55 = 0.743d2
-    
-    e15 = 11.7d0
-    e24 = 5.16d0
-    
-    eps11 = 6.903d0
-    eps22 = 3.27d-1
+    !c44 = 0.25d2
+    !c55 = 0.743d2
+    !
+    !e15 = 11.7d0
+    !e24 = 5.16d0
+    !
+    !eps11 = 6.903d0
+    !eps22 = 3.27d-1
    
     eps0 = 8.85d-3
     h = 5d0; d = h/2;
@@ -51,7 +51,7 @@ integer i, pointsNum, freqNum
     !call plotTestField
     !call plotTestRes   
     !call plotResModSum
-    call plotAllCurves(3.2d0)
+    call plotAllCurves(3.5d0)
     !call plotDcurves(fmin, fmax, fstep, dzetaMin, dzetaMax, haminStep, haminEps)
     
 contains   
@@ -93,9 +93,9 @@ contains
     subroutine plotAllCurves(fmax)
     implicit none
     real*8 Sf(4), Sdzeta(4), Af(4), Adzeta(4), fmax
-    namelist/Xcut/ Sf, Sdzeta, Af, Adzeta
+    namelist/Ycut/ Sf, Sdzeta, Af, Adzeta
         open(unit=1,file='startPoints.txt',status='old')
-        read(1, Xcut); close(1);
+        read(1, Ycut); close(1);
      
         open(1, file="C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\DispSurfer2\S0.txt", FORM='FORMATTED');
         open(2, file="C:\Users\tiama\OneDrive\Рабочий стол\IMMI\Nedospasov\pz4\pz4\DispSurfer2\S1.txt", FORM='FORMATTED');
@@ -113,8 +113,8 @@ contains
     
         
         do i = 1, 4
-            call DispSurfer2(Sf(i), Sdzeta(i), 1d-3, fmax, i); print*, 'S', i-1, ' curve done';
-            call DispSurfer2(Af(i), Adzeta(i), 1d-3, fmax, i + 6); print*, 'A', i-1, ' curve done';
+            call DispSurfer2(Sf(i), Sdzeta(i), 0.5d-3, fmax, i); print*, 'S', i-1, ' curve done';
+            call DispSurfer2(Af(i), Adzeta(i), 0.5d-3, fmax, i + 6); print*, 'A', i-1, ' curve done';
         enddo
                 
 
